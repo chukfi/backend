@@ -39,10 +39,10 @@ func printHelp() {
 
 	fmt.Printf("Usage: %s frontend [--url=<repo-url>] [--directory=<output-directory>] [--verbose|-v]\n", cmd)
 	fmt.Println("\nOptions:")
-	fmt.Println("  --url=<repo-url>          The URL of the frontend repository to clone (default: https://github.com/chukfi/frontend.git)")
-	fmt.Println("  --directory=<output-directory>  The directory to move the built frontend files to (default: ./public)")
-	fmt.Println("  --verbose, -v             Enable verbose output")
-	fmt.Println("  --help, -h               Show this help message")
+	fmt.Println("  --url=<repo-url>                  The URL of the frontend repository to clone (default: https://github.com/chukfi/frontend.git)")
+	fmt.Println("  --directory=<output-directory>    The directory to move the built frontend files to (default: ./public)")
+	fmt.Println("  --verbose, -v                     Enable verbose output")
+	fmt.Println("  --help, -h                        Show this help message")
 
 }
 

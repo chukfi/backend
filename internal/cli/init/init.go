@@ -5,6 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	cli_frontend_downloader "github.com/chukfi/backend/internal/cli/frontend-downloader"
 )
 
 var requiredCommands = []string{"git", "go"}
@@ -41,12 +43,14 @@ func printHelp() {
 		cmd = parts[len(parts)-1]
 	}
 
-	fmt.Printf("Usage: %s init [--frontend-url=<repo-url>] [--backend-url=<repo_url>] [--no-frontend] [--verbose|-v]\n", cmd)
+	fmt.Printf("Usage: %s init [--frontend-url=<repo-url>] [--backend-url=<repo_url>] [--directory=<directory>] [--no-frontend] [--verbose|-v]\n", cmd)
 	fmt.Println("\nOptions:")
-	fmt.Println("  --backend-url=<repo_url>          The URL of the backend repository to clone (default: https://github.com/chukfi/cms.git)")
-	fmt.Println("  --frontend-url=<repo-url>          The URL of the frontend repository to clone (default: https://github.com/chukfi/frontend.git)")
-	fmt.Println("  --verbose, -v             Enable verbose output")
-	fmt.Println("  --help, -h               Show this help message")
+	fmt.Println("  --frontend-url=<repo-url>   The URL of the frontend repository to clone (default: https://github.com/chukfi/frontend.git)")
+	fmt.Println("  --backend-url=<repo_url>    The URL of the backend repository to clone (default: https://github.com/chukfi/cms.git)")
+	fmt.Println("  --directory=<directory>     The directory to clone the repositories into (default: ./backend)")
+	fmt.Println("  --no-frontend               Do not clone the frontend repository")
+	fmt.Println("  --verbose, -v               Enable verbose output")
+	fmt.Println("  --help, -h                  Show this help message")
 
 }
 
@@ -61,6 +65,7 @@ func CLI(args []string) {
 	frontend_url := "https://github.com/chukfi/frontend.git"
 	backend_url := "https://github.com/chukfi/cms.git"
 	use_frontend := true
+	directory := "./backend"
 
 	for _, arg := range args {
 		if strings.HasPrefix(arg, "--frontend-url=") {
@@ -69,8 +74,13 @@ func CLI(args []string) {
 			backend_url = strings.TrimPrefix(arg, "--backend-url=")
 		} else if arg == "--no-frontend" {
 			use_frontend = false
+		} else if strings.HasPrefix(arg, "--directory=") {
+			directory = strings.TrimPrefix(arg, "--directory=")
 		} else if arg == "--verbose" || arg == "-v" {
 			isVerbose = true
+		} else if arg == "--help" || arg == "-h" {
+			printHelp()
+			return
 		}
 	}
 
@@ -83,18 +93,67 @@ func CLI(args []string) {
 		}
 	}
 
-	printInColour(green, "Cloning backend repository:" + backend_url)
+	// create temp directory
+	tempDir, err := os.MkdirTemp("", "cms-init-")
 
-	cmd := exec.Command("git", "clone", backend_url)
+	if err != nil {
+		printInColour(red, "Error creating temporary directory: "+err.Error())
+		return
+	}
+
+	printInColour(green, "Cloning backend repository: "+backend_url)
+
+	cmd := exec.Command("git", "clone", backend_url, tempDir+"/backend")
 
 	if isVerbose {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 	}
-	err := cmd.Run()
-	if err != nil {
-		printInColour(red, "Error cloning backend repository: " + err.Error())
+
+	pullErr := cmd.Run()
+
+	if pullErr != nil {
+		printInColour(red, "Error cloning backend repository: "+pullErr.Error())
 		return
 	}
+
+	printInColour(green, "Cloned backend repository successfully.")
+
+	// if the backend url is https://github.com/chukfi/cms.git, then use the folder inside called "backend-test"
+	if backend_url == "https://github.com/chukfi/cms.git" {
+		printlnVerbose("using crm directory, using ./backend-test")
+		// rename backend-test to ../backend-real, then delete backend and rename backend-real to backend
+		err = os.Rename(tempDir+"/backend/backend-test", tempDir+"/backend-real")
+		if err != nil {
+			printInColour(red, "Error renaming backend-test directory: "+err.Error())
+			return
+		}
+		err = os.RemoveAll(tempDir + "/backend")
+		if err != nil {
+			printInColour(red, "Error removing old backend directory: "+err.Error())
+			return
+		}
+		err = os.Rename(tempDir+"/backend-real", tempDir+"/backend")
+		if err != nil {
+			printInColour(red, "Error renaming backend-real to backend: "+err.Error())
+			return
+		}
+	}
+	printInColour(green, "Backend repository cloned successfully.")
+
+	// move backend to ./backend
+	err = os.Rename(tempDir+"/backend", directory)
+	if err != nil {
+		printInColour(red, "Error moving backend directory: "+err.Error())
+		return
+	}
+
+	if use_frontend {
+		fakeArgs := []string{"--url=" + frontend_url, "--directory=" + directory + "/public"}
+		cli_frontend_downloader.CLI(fakeArgs)
+		printlnVerbose("Done!")
+	}
+
+	printInColour(green, "Initialization completed successfully.")
 
 }

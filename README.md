@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="./assets/branding/logo.jpg" alt="Chukfi CMS Logo" width="200" height="200" />
+  <img src="https://github.com/chukfi/cms/raw/main/assets/branding/logo.jpg" alt="Chukfi CMS Logo" width="200" height="200" />
   
   # Chukfi CMS
   
@@ -31,7 +31,21 @@ Or install the CLI globally:
 go install github.com/chukfi/backend/cmd/chukfi@latest
 ```
 
-## Quick Start
+## Automatic Quick Start
+
+### 1. Download the CLI
+```bash
+go install github.com/chukfi/backend/cmd/chukfi@latest
+```
+
+### 2. Run the init command
+```bash
+chukfi init # OPTIONAL: --directory=./backend
+```
+
+This will create a directory called "backend" which clones the crm/backend-test as well as the frontend, builds & places it in the public folder.
+
+## Manual Quick Start
 
 ### 1. Set Up Database
 
@@ -119,13 +133,14 @@ import (
     "github.com/chukfi/backend/src/lib/permissions"
     "github.com/go-chi/chi/v5"
     "gorm.io/gorm"
+    "my-module/schema"
 )
 
 func main() {
     customSchema := []interface{}{
-        &Post{},
-        &APIKeys{},
-        &HiddenModel{}
+        &schema.Post{},
+        &schema.APIKeys{},
+        &schema.HiddenModel{}
     }
 
     database.InitDatabase(customSchema)
@@ -194,6 +209,19 @@ Embed `schema.AdminOnly` to restrict model access to authenticated users with ad
 type SecretConfig struct {
     schema.BaseModel
     schema.AdminOnly
+    Key   string `gorm:"type:varchar(100)"`
+    Value string `gorm:"type:text"`
+}
+```
+
+### Hidden Models
+
+Embed `schema.Hidden` to restrict model access to everyone, so it is not displayed in the API or the chukfi interfaces.
+
+```go
+type HiddenConfig struct {
+    schema.BaseModel
+    schema.Hidden
     Key   string `gorm:"type:varchar(100)"`
     Value string `gorm:"type:text"`
 }
@@ -307,9 +335,13 @@ chukfi setup-frontend # --url=https://github.com/your/frontend.git
 
 ## CLI Commands
 
+Use any command with -h to see the options. Or use just chukfi to see the commands.
+
 ```bash
 chukfi generate-types    # Generate TypeScript types from database schema
 chukfi setup-frontend     # Clone, build, and serve frontend
+chukfi init
+
 ```
 
 ## License
