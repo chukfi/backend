@@ -4,6 +4,7 @@ import (
 	"os"
 	"strings"
 
+	cli_frontend_downloader "github.com/chukfi/backend/internal/cli/frontend-downloader"
 	cli_generate_types "github.com/chukfi/backend/internal/cli/generate-types"
 	"github.com/joho/godotenv"
 )
@@ -37,5 +38,11 @@ func main() {
 		}
 
 		cli_generate_types.CLI(dsn, []interface{}{}, otherArgs)
+	case "frontend":
+		// git clones frontend repo (or a repo specified with --url=...)
+		// and builds it with npm build
+		// then moves the build files to ./public
+		// then allow it to be served by the backend
+		cli_frontend_downloader.CLI(otherArgs)
 	}
 }

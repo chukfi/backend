@@ -159,12 +159,22 @@ func AuthMiddlewareWithDatabase(database *gorm.DB) func(http.Handler) http.Handl
 	}
 }
 
-func SetupRouter(database *gorm.DB) *chi.Mux {
+func SetupRouter(database *gorm.DB, frontendDirectory string) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
 	r.Use(chumiddleware.CaseSensitiveMiddleware)
 	r.Use(chumiddleware.SaveAuthTokenMiddleware)
+
+	// if frontendDirectory is set, serve static files from there
+	if frontendDirectory != "" {
+		fileServer := http.FileServer(http.Dir(frontendDirectory))
+		r.Handle("/*", http.StripPrefix("/", fileServer))
+	} else {
+		yellow := "\033[33m"
+		reset := "\033[0m"
+		fmt.Println(string(yellow), "Warning: Frontend directory not set. Static files will not be served.", string(reset))
+	}
 
 	// admin routes with database so /admin/collection/${collectionName}/get
 
