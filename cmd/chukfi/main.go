@@ -74,5 +74,9 @@ func main() {
 	case "init":
 		// setups frontend and backend
 		cli_init.CLI(otherArgs)
+	default:
+		fmt.Printf("Unknown command: %s\n", command)
+		printHelp()
+		os.Exit(1)
 	}
 }

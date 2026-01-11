@@ -46,6 +46,9 @@ func Serve(config *ServeConfig) {
 	fmt.Println("\nRoutes:\n")
 
 	chi.Walk(config.Router, func(method string, route string, handler http.Handler, middlewares ...func(http.Handler) http.Handler) error {
+		if route == "/*" {
+			return nil // ignore public route
+		}
 		fmt.Printf("[%s]: '%s' has %d middlewares\n", method, route, len(middlewares))
 		return nil
 	})

@@ -184,7 +184,7 @@ func CLI(args []string) {
 	}
 
 	if buildDir == "" {
-		fmt.Printf(red + "Error: Could not find build directory (tried build/, dist/, public/)\n" + reset)
+		fmt.Printf(red + "Error: Could not find build directory (tried build/, dist/, public/)" + reset)
 		return
 	}
 
