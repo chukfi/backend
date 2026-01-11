@@ -4,140 +4,314 @@
   # Chukfi CMS
   
   **Chukfi** (chook-fee) is the Choctaw word for **rabbit**, a symbol of speed, agility, and quick thinking.<br>
-  Chukfi CMS embraces those qualities by providing a fast, modern, open-source CMS built with<br>
-  **Astro**, **React**, and **Go**.
+  Chukfi CMS embraces those qualities by providing a fast, modern, open-source headless CMS built with **Go**.
 </div>
 
 <div align="center">
 
-[![Release](https://img.shields.io/github/v/release/Native-Consulting-Services/chukfi-cms?include_prereleases&style=flat-square)](https://github.com/Native-Consulting-Services/chukfi-cms/releases)
-[![CI](https://img.shields.io/github/actions/workflow/status/Native-Consulting-Services/chukfi-cms/ci.yml?branch=main&style=flat-square)](https://github.com/Native-Consulting-Services/chukfi-cms/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/chukfi/backend?include_prereleases&style=flat-square)](https://github.com/chukfi/backend/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Use this template](https://img.shields.io/badge/Use%20this-Template-blue?style=flat-square)](https://github.com/Native-Consulting-Services/chukfi-cms/generate)
-[![Contributors](https://img.shields.io/github/contributors/Native-Consulting-Services/chukfi-cms?style=flat-square)](https://github.com/Native-Consulting-Services/chukfi-cms/graphs/contributors)
+[![Go Version](https://img.shields.io/badge/Go-1.21+-00ADD8?style=flat-square&logo=go)](https://go.dev/)
 
 </div>
 
-> **🚀 Template Repository**: Use this template to create your own CMS! Click "Use this template" above to get started.
+## Overview
 
-> **✅ Ready for Development**: Chukfi CMS is fully functional with zero external dependencies. Complete project structure, authentication, database schema, and admin UI are ready. **5-minute setup** from clone to running!
+Chukfi is a Go library for building content management systems. It provides authentication, permissions, schema registration, and a REST API out of the box. You define your schemas and Chukfi handles the rest.
 
-An open-source, self-hosted content management system built as a monorepo with Astro frontend and Go backend.
-
-## ✨ Key Features
-
-- ⚡ **Fast Go backend** with Pure SQLite (no CGO dependencies)
-- 🐇 **Agile Astro + React** admin dashboard with hot reload
-- 🛡️ **Role-based access control** with granular permissions
-- 📚 **Collection-based schema** system (Payload CMS style)
-- 📦 **Media uploads** and library management
-- 🌱 **Open-source** and community-driven
-- 🚀 **Zero external dependencies** - works immediately after clone
-
-## 📸 Screenshots
-
-<div align="center">
-  
-  *Screenshots coming soon - Admin dashboard, collection management, and media library interfaces*
-  
-</div>
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-- **Node.js 18+** and **Go 1.21+**
-
-### 5-Minute Setup
+## Installation
 
 ```bash
-# Use this template or clone directly
-git clone https://github.com/Native-Consulting-Services/chukfi-cms.git
-cd chukfi-cms
-
-# Install dependencies
-cd frontend && npm install && cd ..
-cd backend && go mod tidy && cd ..
-
-# Initialize database and start servers
-cd backend && go run cmd/migrate/main.go up && cd ..
-
-# Option A: VS Code (Recommended)
-# Ctrl+Shift+P → "Tasks: Run Task" → "Start Development Environment"
-
-# Option B: Manual (two terminals)
-cd frontend && npm run dev     # Terminal 1
-cd backend && go run cmd/server/main.go  # Terminal 2
+go get github.com/chukfi/backend
 ```
 
-### Verify Installation
+Or install the CLI globally:
 
-- **Frontend**: http://localhost:4321 ✅
-- **Admin Dashboard**: http://localhost:4321/admin ✅
-- **Backend API**: http://localhost:8080/health ✅
-- **Default Login**: admin@chukfi.com / admin123 ✅
-
-## 📖 Documentation
-
-### **Getting Started**
-
-- 🚀 **[Installation Guide](docs/INSTALLATION.md)** - Detailed setup instructions
-- 🎯 **[Quick Start Tutorial](docs/QUICK_START.md)** - Your first collection in 10 minutes
-- 🛠️ **[Development Guide](DEVELOPMENT.md)** - Local development workflow
-
-### **Complete Documentation**
-
-- 📚 **[Documentation Hub](docs/README.md)** - All guides and references
-- 🏗️ **[Collections Guide](docs/guides/COLLECTIONS.md)** - Content management
-- 👥 **[Users & Permissions](docs/guides/USERS_PERMISSIONS.md)** - Access control
-- 🔌 **[REST API Reference](docs/api/REST_API.md)** - Complete API docs
-
-## 🏗️ Architecture
-
-```
-chukfi-cms/
-├── frontend/              # Astro + React admin dashboard
-├── backend/               # Go HTTP API with Pure SQLite
-├── shared/                # TypeScript type definitions
-├── docs/                  # 📖 Complete documentation
-└── assets/                # 🎨 Branding and media assets
+```bash
+go install github.com/chukfi/backend/cmd/chukfi@latest
 ```
 
-**Tech Stack**: Astro, React, Tailwind CSS, Go, chi router, Pure SQLite, JWT
+## Quick Start
 
-## 🤝 Contributing
+### 1. Set Up Database
 
-We welcome contributions! See our [Contributing Guide](CONTRIBUTING.md) for details.
+Chukfi uses MySQL/TiDB. The easiest way to get started is with Docker:
 
-**Quick Contributing Steps**:
+```yaml
+# docker-compose.yml
+version: '3.8'
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Make your changes and add tests
-4. Submit a pull request
+services:
+  tidb:
+    image: pingcap/tidb:latest
+    ports:
+      - "4002:4000"
+    command:
+      - --store=unistore
+      - --path=/tmp/tidb
+    volumes:
+      - ./docker-tidb:/tmp/tidb
+```
 
-## 📦 Releases & Roadmap
+```bash
+docker-compose up -d
+```
 
-- **📋 [Latest Release](https://github.com/Native-Consulting-Services/chukfi-cms/releases)** - Download pre-built binaries
-- **🗺️ [Roadmap](docs/ROADMAP.md)** - Planned features and timeline
-- **📝 [Changelog](CHANGELOG.md)** - Release history and changes
+### 2. Create Your Project
 
-## 💬 Community & Support
+```bash
+mkdir my-cms && cd my-cms
+go mod init my-cms
+go get github.com/chukfi/backend
+go install github.com/chukfi/backend/cmd/chukfi@latest
+chukfi setup-frontend # optional --url={url} --directory={directory}
+```
 
-- 💡 **[GitHub Discussions](https://github.com/Native-Consulting-Services/chukfi-cms/discussions)** - Q&A and announcements
-- 🐛 **[Issues](https://github.com/Native-Consulting-Services/chukfi-cms/issues)** - Bug reports and feature requests
-- 🔒 **[Security Policy](SECURITY.md)** - Report security vulnerabilities
+### 3. Define Your Schema
 
-## 📄 License
+```go
+// schema.go
+package main
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+import "github.com/chukfi/backend/database/schema"
 
----
+type Post struct {
+    schema.BaseModel
+    Type     string `gorm:"type:varchar(100);not null"`
+    Body     string `gorm:"type:text;not null"`
+    Title    string `gorm:"type:varchar(255);not null;index"`
+    AuthorID string `gorm:"type:char(36);index"`
+}
 
-<div align="center">
+type HiddenModel struct {
+    schema.BaseModel
+    schema.Hidden
+    Key        string `gorm:"type:char(64);not null;uniqueIndex"`
+}
 
-**Built with ❤️ by the Chukfi CMS community**
+type APIKeys struct {
+    schema.BaseModel
+    schema.AdminOnly
+    Key        string `gorm:"type:char(64);not null;uniqueIndex"`
+    OwnerEmail string `gorm:"type:varchar(100);not null;index"`
+    ExpiresAt  int64  `gorm:"not null;index"`
+}
 
-⭐ **Star this repository** if you find it useful!
+// or any other schemas, there are examples
+```
 
-</div>
+Embed `schema.AdminOnly` in any model to restrict access to authenticated admin users.
+Embed `schema.Hidden` in any model to hide it from any user as well as the dashboard.
+
+### 4. Create Your Server
+
+```go
+// main.go
+package main
+
+import (
+    "net/http"
+
+    database "github.com/chukfi/backend/database/mysql"
+    "github.com/chukfi/backend/server/router"
+    "github.com/chukfi/backend/server/serve"
+    "github.com/chukfi/backend/src/httpresponder"
+    "github.com/chukfi/backend/src/lib/permissions"
+    "github.com/go-chi/chi/v5"
+    "gorm.io/gorm"
+)
+
+func main() {
+    customSchema := []interface{}{
+        &Post{},
+        &APIKeys{},
+        &HiddenModel{}
+    }
+
+    database.InitDatabase(customSchema)
+
+    r := router.SetupRouter(database.DB, "./public") // or r := router.SetupRouter(database.DB) for no server.
+
+    r.Get("/posts", func(w http.ResponseWriter, r *http.Request) {
+        posts, err := gorm.G[Post](database.DB).Find(r.Context())
+        if err != nil {
+            httpresponder.SendErrorResponse(w, r, err.Error(), 500)
+            return
+        }
+        httpresponder.SendNormalResponse(w, r, posts)
+    })
+
+    r.Route("/api", func(r chi.Router) {
+        r.Use(router.AuthMiddlewareWithDatabase(database.DB))
+
+        r.Get("/whoami", func(w http.ResponseWriter, r *http.Request) {
+            user, _ := router.GetUserFromRequest(r, database.DB)
+            httpresponder.SendNormalResponse(w, r, user)
+        })
+    })
+
+    serveConfig := serve.NewServeConfig("3000", []interface{}{}, database.DB, r)
+    serve.Serve(serveConfig)
+}
+```
+
+### 5. Configure Environment
+
+```bash
+# .env
+DATABASE_DSN="root:@tcp(127.0.0.1:4002)/test?charset=utf8mb4&parseTime=True&loc=Local"
+```
+
+### 6. Run
+
+```bash
+go run .
+```
+
+## Features
+
+### Schema System
+
+All models should embed `schema.BaseModel` which provides:
+- `ID` (UUID)
+- `CreatedAt`
+- `UpdatedAt`  
+- `DeletedAt` (soft delete)
+
+```go
+type Product struct {
+    schema.BaseModel
+    Name  string `gorm:"type:varchar(255);not null"`
+    Price int    `gorm:"not null"`
+}
+```
+
+### Admin-Only Models
+
+Embed `schema.AdminOnly` to restrict model access to authenticated users with admin permissions:
+
+```go
+type SecretConfig struct {
+    schema.BaseModel
+    schema.AdminOnly
+    Key   string `gorm:"type:varchar(100)"`
+    Value string `gorm:"type:text"`
+}
+```
+
+### Authentication
+
+Chukfi provides built-in auth endpoints:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/admin/auth/login` | POST | Login with email/password, returns auth token |
+| `/admin/auth/me` | GET | Get current user info |
+
+Use `router.AuthMiddlewareWithDatabase(db)` to protect routes:
+
+```go
+r.Route("/protected", func(r chi.Router) {
+    r.Use(router.AuthMiddlewareWithDatabase(database.DB))
+    
+    r.Get("/data", handler)
+})
+```
+
+### Permissions
+
+Register custom permissions and check them in handlers:
+
+```go
+viewPosts, _ := permissions.RegisterPermission("ViewPosts")
+
+r.Get("/posts", func(w http.ResponseWriter, r *http.Request) {
+    if !router.RequestRequiresPermission(r, database.DB, viewPosts) {
+        httpresponder.SendErrorResponse(w, r, "Forbidden", 403)
+        return
+    }
+    // ...
+})
+```
+
+Or use middleware for entire route groups:
+
+```go
+r.Route("/admin-only", func(r chi.Router) {
+    r.Use(router.RoutesRequiresPermission(database.DB, permissions.ManageModels))
+    // all routes here require ManageModels permission
+})
+```
+
+### Collection API
+
+Chukfi automatically provides REST endpoints for registered schemas:
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/admin/collection/all` | GET | List all collections (requires auth) |
+| `/admin/collection/{name}/get` | GET | Get all entries in collection |
+| `/admin/collection/{name}/create` | POST | Create new entry (requires auth) |
+| `/admin/collection/{name}/metadata` | GET | Get collection schema metadata |
+
+### Database Helper
+
+Use the typed query builder for cleaner database operations:
+
+```go
+import databasehelper "github.com/chukfi/backend/database/helper"
+
+post, err := databasehelper.Get[Post](database.DB).
+    Where("title = ?", "My Post").
+    First()
+
+posts, err := databasehelper.Get[Post](database.DB).
+    Where("author_id = ?", userID).
+    Order("created_at DESC").
+    Limit(10).
+    Find()
+```
+
+### TypeScript Type Generation
+
+Generate TypeScript types from your Go schemas:
+
+```go
+import generate_types "github.com/chukfi/backend/cmd/generate-types"
+
+generate_types.GenerateTypescriptTypes(&generate_types.GenerateTypesConfig{
+    Schema:   customSchema,
+    Database: database.DB,
+})
+```
+
+Or use the CLI:
+
+```bash
+chukfi generate-types --schema=path/to/schema.go # optionally --dsn={dsn} --database={database provider (mysql/postgres)}
+```
+
+### Admin Frontend Serving
+
+Serve a static admin frontend directory:
+
+```go
+r := router.SetupRouter(database.DB, "./public")
+```
+
+Build and download the admin frontend automatically:
+
+```bash
+chukfi setup-frontend # --url=https://github.com/your/frontend.git
+```
+
+## CLI Commands
+
+```bash
+chukfi generate-types    # Generate TypeScript types from database schema
+chukfi setup-frontend     # Clone, build, and serve frontend
+```
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.

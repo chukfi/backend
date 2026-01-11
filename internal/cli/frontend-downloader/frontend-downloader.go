@@ -57,7 +57,7 @@ func CLI(args []string) {
 	var directory string
 
 	for _, arg := range args {
-		if strings.HasPrefix(arg, "--url=") || strings.HasPrefix(arg, "-u=") {
+		if strings.HasPrefix(arg, "--url="){
 			url = strings.TrimPrefix(arg, "--url=")
 		} else if strings.HasPrefix(arg, "--directory=") {
 			directory = strings.TrimPrefix(arg, "--directory=")

@@ -159,7 +159,7 @@ func AuthMiddlewareWithDatabase(database *gorm.DB) func(http.Handler) http.Handl
 	}
 }
 
-func SetupRouter(database *gorm.DB, frontendDirectory string) *chi.Mux {
+func SetupRouter(database *gorm.DB, frontendDirectory ...string) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
@@ -167,8 +167,8 @@ func SetupRouter(database *gorm.DB, frontendDirectory string) *chi.Mux {
 	r.Use(chumiddleware.SaveAuthTokenMiddleware)
 
 	// if frontendDirectory is set, serve static files from there
-	if frontendDirectory != "" {
-		fileServer := http.FileServer(http.Dir(frontendDirectory))
+	if len(frontendDirectory) > 0 && frontendDirectory[0] != "" {
+		fileServer := http.FileServer(http.Dir(frontendDirectory[0]))
 		r.Handle("/*", http.StripPrefix("/", fileServer))
 	} else {
 		yellow := "\033[33m"
