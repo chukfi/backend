@@ -3,7 +3,6 @@ module github.com/chukfi/backend
 go 1.25.3
 
 require (
-	github.com/Native-Consulting-Services/chufki-cms-backend v0.0.0-20260111170519-b4c6a381fd82
 	github.com/go-chi/chi/v5 v5.2.3
 	github.com/joho/godotenv v1.5.1
 	github.com/satori/go.uuid v1.2.0
