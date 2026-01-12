@@ -1,6 +1,7 @@
 package schemaregistry
 
 import (
+	"errors"
 	"reflect"
 	"strings"
 	"sync"
@@ -248,6 +249,32 @@ func GetFieldNames(tableName string) []string {
 	}
 
 	return names
+}
+
+// checks if the body provided matches MOST of the schema requirements, so it doesnt have any stray fields
+// for example user has fields: ID, Fullname, Email, Password, Permissions
+// if body has ID, Fullname, Email, Password -> valid
+// if body has ID, Fullname, Email, Password, ExtraField -> invalid
+// if body has ID, Fullname -> valid
+// returns isValid, err
+// rename this function at some point its ahh
+func IsBodyMostlyValid(tableName string, body map[string]interface{}) (bool, error) {
+	mu.RLock()
+	defer mu.RUnlock()
+	meta, exists := registry[tableName]
+	if !exists {
+		return false, errors.New("table not registered in schema registry")
+	}
+	fieldMap := make(map[string]FieldMetadata)
+	for _, field := range meta.Fields {
+		fieldMap[field.Name] = field
+	}
+	for key := range body {
+		if _, exists := fieldMap[key]; !exists {
+			return false, errors.New("unknown field: " + key)
+		}
+	}
+	return true, nil
 }
 
 // ValidateBody checks for missing required fields and unknown fields in the provided body map.
